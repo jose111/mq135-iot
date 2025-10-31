@@ -1,56 +1,94 @@
-body {
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f4f7fb;
-  text-align: center;
-  color: #333;
+/* ======= ESTILO GENERAL ======= */
+:root {
+  --color-primario: #1a73e8;
+  --color-texto: #202124;
+  --color-secundario: #5f6368;
+  --color-fondo: #f8f9fa;
+  --color-borde: #dadce0;
+}
+
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
 }
 
+body {
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ======= ENCABEZADO ======= */
 header {
-  background: linear-gradient(135deg, #0078d4, #00c6ff);
-  color: white;
-  padding: 20px 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  padding: 40px 20px 20px;
 }
 
-.cards {
-  margin-top: 40px;
+header h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--color-primario);
 }
 
-.card {
-  background: white;
+header p {
+  color: var(--color-secundario);
+  margin-top: 5px;
+  font-size: 0.95rem;
+}
+
+/* ======= PANEL CENTRAL ======= */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid var(--color-borde);
   border-radius: 12px;
-  display: inline-block;
-  padding: 25px 40px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  padding: 40px 60px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: center;
+  max-width: 380px;
+  width: 100%;
 }
 
-h2 {
-  font-size: 1.3rem;
+.panel h2 {
+  font-size: 1.2rem;
+  color: var(--color-secundario);
+  margin-bottom: 20px;
+}
+
+.valor {
+  font-size: 3rem;
+  font-weight: 500;
+  color: var(--color-primario);
   margin-bottom: 10px;
 }
 
-#valor {
-  font-size: 3rem;
-  color: #0078d4;
+.comentario {
+  font-size: 1.05rem;
+  margin-bottom: 20px;
+  color: var(--color-texto);
 }
 
-#comentario {
-  font-size: 1.1rem;
-  margin-top: 15px;
-  color: #444;
-}
-
-#fecha {
-  margin-top: 10px;
+.fecha {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-secundario);
 }
 
+/* ======= PIE DE PÁGINA ======= */
 footer {
-  background: #222;
-  color: white;
-  padding: 10px;
-  margin-top: 50px;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9rem;
+  color: var(--color-secundario);
+  border-top: 1px solid var(--color-borde);
 }
