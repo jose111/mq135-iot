@@ -3,25 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitor MQ135 - ESP32</title>
+  <title>Monitor MQ135</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>🌍 Monitor de Calidad del Aire</h1>
-    <p>ESP32 + MQ135 conectado a ThingSpeak</p>
+    <h1>Monitor de Calidad del Aire</h1>
+    <p>ESP32 + MQ135 • Datos en tiempo real</p>
   </header>
 
-  <section class="cards">
-    <div class="card">
-      <h2>Lectura actual del MQ135</h2>
-      <div id="valor">Cargando...</div>
-      <div id="comentario">Analizando...</div>
-      <div id="fecha"></div>
-    </div>
-  </section>
+  <main>
+    <section class="panel">
+      <h2>Lectura actual</h2>
+      <div id="valor" class="valor">—</div>
+      <div id="comentario" class="comentario">Analizando...</div>
+      <div id="fecha" class="fecha"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Desarrollado con 💡 por [Tu Nombre]</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
 </html>
-
