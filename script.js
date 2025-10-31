@@ -6,139 +6,73 @@ const readAPIKey = "EGE8PI3NSAWXTI6X";
 const fieldNum = 1;
 
 // =========================
-// VARIABLES Y ESTADO
+// ESTADO DEL BOT
 // =========================
-let chart;
-let labels = [];
-let valores = [];
+let valorAnterior = null;
+let tendencia = "estable";
 
 // =========================
-// FUNCIONES BASE
+// BOT INTELIGENTE DE CALIDAD DEL AIRE
 // =========================
-async function obtenerDatos() {
-  const url = `https://api.thingspeak.com/channels/${channelID}/fields/${fieldNum}.json?api_key=${readAPIKey}&results=50`;
-  const res = await fetch(url);
-  const data = await res.json();
-  const feeds = data.feeds || [];
-
-  labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString());
-  valores = feeds.map(f => parseFloat(f.field1));
-
-  return feeds;
-}
-
-// =========================
-// GRÁFICO CHART.JS
-// =========================
-async function crearGrafico() {
-  const ctx = document.getElementById("graficoMQ135").getContext("2d");
-  await obtenerDatos();
-
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Nivel MQ135",
-        data: valores,
-        borderColor: "#0078d4",
-        backgroundColor: "rgba(0,120,212,0.1)",
-        borderWidth: 2,
-        tension: 0.25,
-        fill: true,
-      }]
-    },
-    options: {
-      scales: {
-        y: { beginAtZero: true }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
-}
-
-// =========================
-// BOT DE CALIDAD DEL AIRE
-// =========================
-let umbrales = JSON.parse(localStorage.getItem("umbrales")) || {
-  limpio: 200,
-  moderado: 400,
-  peligroso: 800
-};
-
 function analizarCalidad(valor) {
-  if (valor < umbrales.limpio) return "💨 Aire limpio (excelente)";
-  if (valor < umbrales.moderado) return "🙂 Aire moderado (aceptable)";
-  if (valor < umbrales.peligroso) return "😷 Aire contaminado (precaución)";
-  return "☠️ Aire peligroso (muy mala calidad)";
+  // Determinar tendencia
+  if (valorAnterior !== null) {
+    if (valor > valorAnterior + 20) tendencia = "subiendo";
+    else if (valor < valorAnterior - 20) tendencia = "bajando";
+    else tendencia = "estable";
+  }
+  valorAnterior = valor;
+
+  // Evaluación del aire
+  let comentario = "";
+  if (valor < 200) {
+    comentario = "💨 Aire limpio y fresco.";
+    if (tendencia === "bajando") comentario += " La calidad está mejorando.";
+    else if (tendencia === "subiendo") comentario += " Ligero aumento en partículas.";
+  } 
+  else if (valor < 400) {
+    comentario = "🙂 Aire aceptable, sin riesgo inmediato.";
+    if (tendencia === "subiendo") comentario += " Posible incremento leve en contaminación.";
+  } 
+  else if (valor < 800) {
+    comentario = "😷 Aire contaminado, evita espacios cerrados sin ventilación.";
+    if (tendencia === "bajando") comentario += " Parece estar mejorando.";
+  } 
+  else {
+    comentario = "☠️ Aire muy peligroso. Mantente en interiores si es posible.";
+    if (tendencia === "bajando") comentario += " Pero la calidad empieza a mejorar.";
+  }
+
+  return comentario;
 }
 
 // =========================
-// ACTUALIZACIÓN EN TIEMPO REAL
+// ACTUALIZAR DATOS DESDE THINGSPEAK
 // =========================
 async function actualizarDatos() {
   const url = `https://api.thingspeak.com/channels/${channelID}/fields/${fieldNum}/last.json?api_key=${readAPIKey}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
 
-  if (data && data.field1) {
-    const valor = parseFloat(data.field1);
-    const fecha = new Date(data.created_at);
+    if (data && data.field1) {
+      const valor = parseFloat(data.field1);
+      const fecha = new Date(data.created_at);
 
-    document.getElementById("valor").textContent = valor;
-    document.getElementById("comentario").textContent = analizarCalidad(valor);
-    document.getElementById("fecha").textContent =
-      "Última actualización: " + fecha.toLocaleString();
-
-    if (chart) {
-      chart.data.labels.push(fecha.toLocaleTimeString());
-      chart.data.datasets[0].data.push(valor);
-      if (chart.data.labels.length > 50) {
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-      }
-      chart.update();
+      document.getElementById("valor").textContent = valor;
+      document.getElementById("comentario").textContent = analizarCalidad(valor);
+      document.getElementById("fecha").textContent =
+        "Última actualización: " + fecha.toLocaleString();
     }
+  } catch (error) {
+    document.getElementById("valor").textContent = "Error";
+    document.getElementById("comentario").textContent = "No se pudieron obtener los datos.";
+    console.error("Error obteniendo datos:", error);
   }
 }
 
 // =========================
-// ENTRENAMIENTO DEL BOT
-// =========================
-const form = document.getElementById("formEntrenamiento");
-const resetBot = document.getElementById("resetBot");
-
-document.getElementById("limpio").value = umbrales.limpio;
-document.getElementById("moderado").value = umbrales.moderado;
-document.getElementById("peligroso").value = umbrales.peligroso;
-
-form.addEventListener("submit", e => {
-  e.preventDefault();
-  umbrales = {
-    limpio: parseFloat(document.getElementById("limpio").value),
-    moderado: parseFloat(document.getElementById("moderado").value),
-    peligroso: parseFloat(document.getElementById("peligroso").value),
-  };
-  localStorage.setItem("umbrales", JSON.stringify(umbrales));
-  alert("🤖 Bot entrenado con nuevos umbrales personalizados.");
-});
-
-resetBot.addEventListener("click", () => {
-  localStorage.removeItem("umbrales");
-  umbrales = { limpio: 200, moderado: 400, peligroso: 800 };
-  document.getElementById("limpio").value = 200;
-  document.getElementById("moderado").value = 400;
-  document.getElementById("peligroso").value = 800;
-  alert("🔄 Bot restaurado a configuración por defecto.");
-});
-
-// =========================
 // INICIALIZACIÓN
 // =========================
-(async () => {
-  await crearGrafico();
-  await actualizarDatos();
-  setInterval(actualizarDatos, 15000);
-})();
+actualizarDatos();
+setInterval(actualizarDatos, 180000); // 🔁 cada 3 minutos
