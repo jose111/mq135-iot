@@ -1,43 +1,100 @@
-/* Estilos generales */
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background: #f4f7fb;
   text-align: center;
   color: #333;
   margin: 0;
-  padding: 40px;
+  padding: 0;
 }
 
-/* Tarjeta principal */
+header {
+  background: linear-gradient(135deg, #0078d4, #00c6ff);
+  color: white;
+  padding: 20px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cards {
+  margin-top: 30px;
+}
+
 .card {
   background: white;
   border-radius: 12px;
   display: inline-block;
   padding: 25px 40px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
-/* Títulos */
-h1 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-h2 {
-  font-size: 1.2rem;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-/* Valor principal */
 #valor {
   font-size: 3rem;
   color: #0078d4;
 }
 
-/* Fecha de actualización */
-#fecha {
+#comentario {
+  font-size: 1.1rem;
   margin-top: 10px;
-  font-size: 0.9rem;
-  color: #555;
+}
+
+#graficoMQ135 {
+  width: 90%;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.entrenamiento {
+  background: white;
+  border-radius: 12px;
+  display: inline-block;
+  padding: 20px 40px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.05);
+  margin-bottom: 40px;
+}
+
+.entrenamiento form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.entrenamiento label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entrenamiento input {
+  width: 100px;
+  padding: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+button {
+  background: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #005fa3;
+}
+
+button.secundario {
+  background: #ccc;
+  color: #333;
+  margin-top: 10px;
+}
+
+footer {
+  background: #222;
+  color: white;
+  padding: 10px;
+  margin-top: 40px;
 }
