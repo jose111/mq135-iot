@@ -1,34 +1,144 @@
-const channelID = "3140461";              // Tu canal
-const readAPIKey = "EGE8PI3NSAWXTI6X";    // Tu Read API Key
-const fieldNum = 1;                       // Campo que estás usando en ThingSpeak
+// =========================
+// CONFIGURACIÓN THINGSPEAK
+// =========================
+const channelID = "3140461";
+const readAPIKey = "EGE8PI3NSAWXTI6X";
+const fieldNum = 1;
 
-async function actualizarDato() {
-  const url = `https://api.thingspeak.com/channels/${channelID}/fields/${fieldNum}/last.json?api_key=${readAPIKey}`;
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
+// =========================
+// VARIABLES Y ESTADO
+// =========================
+let chart;
+let labels = [];
+let valores = [];
 
-    console.log("Datos obtenidos:", data); // Para depurar
+// =========================
+// FUNCIONES BASE
+// =========================
+async function obtenerDatos() {
+  const url = `https://api.thingspeak.com/channels/${channelID}/fields/${fieldNum}.json?api_key=${readAPIKey}&results=50`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const feeds = data.feeds || [];
 
-    if (data && data.field1) {
-      document.getElementById("valor").textContent = data.field1;
-      if (data.created_at) {
-        const fecha = new Date(data.created_at);
-        document.getElementById("fecha").textContent =
-          "Última actualización: " + (isNaN(fecha) ? "Sin fecha válida" : fecha.toLocaleString());
-      } else {
-        document.getElementById("fecha").textContent = "Sin fecha disponible";
+  labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString());
+  valores = feeds.map(f => parseFloat(f.field1));
+
+  return feeds;
+}
+
+// =========================
+// GRÁFICO CHART.JS
+// =========================
+async function crearGrafico() {
+  const ctx = document.getElementById("graficoMQ135").getContext("2d");
+  await obtenerDatos();
+
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Nivel MQ135",
+        data: valores,
+        borderColor: "#0078d4",
+        backgroundColor: "rgba(0,120,212,0.1)",
+        borderWidth: 2,
+        tension: 0.25,
+        fill: true,
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      },
+      plugins: {
+        legend: { display: false }
       }
-    } else {
-      document.getElementById("valor").textContent = "Sin datos";
-      document.getElementById("fecha").textContent = "";
     }
-  } catch (err) {
-    document.getElementById("valor").textContent = "Error al cargar";
-    console.error("Error al obtener datos:", err);
+  });
+}
+
+// =========================
+// BOT DE CALIDAD DEL AIRE
+// =========================
+let umbrales = JSON.parse(localStorage.getItem("umbrales")) || {
+  limpio: 200,
+  moderado: 400,
+  peligroso: 800
+};
+
+function analizarCalidad(valor) {
+  if (valor < umbrales.limpio) return "💨 Aire limpio (excelente)";
+  if (valor < umbrales.moderado) return "🙂 Aire moderado (aceptable)";
+  if (valor < umbrales.peligroso) return "😷 Aire contaminado (precaución)";
+  return "☠️ Aire peligroso (muy mala calidad)";
+}
+
+// =========================
+// ACTUALIZACIÓN EN TIEMPO REAL
+// =========================
+async function actualizarDatos() {
+  const url = `https://api.thingspeak.com/channels/${channelID}/fields/${fieldNum}/last.json?api_key=${readAPIKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (data && data.field1) {
+    const valor = parseFloat(data.field1);
+    const fecha = new Date(data.created_at);
+
+    document.getElementById("valor").textContent = valor;
+    document.getElementById("comentario").textContent = analizarCalidad(valor);
+    document.getElementById("fecha").textContent =
+      "Última actualización: " + fecha.toLocaleString();
+
+    if (chart) {
+      chart.data.labels.push(fecha.toLocaleTimeString());
+      chart.data.datasets[0].data.push(valor);
+      if (chart.data.labels.length > 50) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+      }
+      chart.update();
+    }
   }
 }
 
-actualizarDato();
-setInterval(actualizarDato, 15000);
+// =========================
+// ENTRENAMIENTO DEL BOT
+// =========================
+const form = document.getElementById("formEntrenamiento");
+const resetBot = document.getElementById("resetBot");
 
+document.getElementById("limpio").value = umbrales.limpio;
+document.getElementById("moderado").value = umbrales.moderado;
+document.getElementById("peligroso").value = umbrales.peligroso;
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  umbrales = {
+    limpio: parseFloat(document.getElementById("limpio").value),
+    moderado: parseFloat(document.getElementById("moderado").value),
+    peligroso: parseFloat(document.getElementById("peligroso").value),
+  };
+  localStorage.setItem("umbrales", JSON.stringify(umbrales));
+  alert("🤖 Bot entrenado con nuevos umbrales personalizados.");
+});
+
+resetBot.addEventListener("click", () => {
+  localStorage.removeItem("umbrales");
+  umbrales = { limpio: 200, moderado: 400, peligroso: 800 };
+  document.getElementById("limpio").value = 200;
+  document.getElementById("moderado").value = 400;
+  document.getElementById("peligroso").value = 800;
+  alert("🔄 Bot restaurado a configuración por defecto.");
+});
+
+// =========================
+// INICIALIZACIÓN
+// =========================
+(async () => {
+  await crearGrafico();
+  await actualizarDatos();
+  setInterval(actualizarDatos, 15000);
+})();
