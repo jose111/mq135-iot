@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Monitor MQ135 - ESP32</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header>
@@ -15,39 +14,11 @@
 
   <section class="cards">
     <div class="card">
-      <h2>Lectura actual</h2>
+      <h2>Lectura actual del MQ135</h2>
       <div id="valor">Cargando...</div>
       <div id="comentario">Analizando...</div>
       <div id="fecha"></div>
     </div>
-  </section>
-
-  <section class="grafico">
-    <h2>📈 Últimas mediciones</h2>
-    <canvas id="graficoMQ135"></canvas>
-  </section>
-
-  <section class="entrenamiento">
-    <h2>🤖 Entrenamiento del Bot de Aire</h2>
-    <p>Ajusta los umbrales según tu experiencia local:</p>
-
-    <form id="formEntrenamiento">
-      <label>
-        Aire limpio hasta:
-        <input type="number" id="limpio" step="1" />
-      </label>
-      <label>
-        Aire moderado hasta:
-        <input type="number" id="moderado" step="1" />
-      </label>
-      <label>
-        Aire peligroso hasta:
-        <input type="number" id="peligroso" step="1" />
-      </label>
-      <button type="submit">Guardar parámetros</button>
-    </form>
-
-    <button id="resetBot" class="secundario">🔄 Restaurar valores por defecto</button>
   </section>
 
   <footer>
